@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Support Bot</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e8f0fe;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    
+        #chatbox {
+            width: 50%;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+    
+        #chatbox h2 {
+            background-color: #4a90e2;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            margin: 0;
+            font-size: 20px;
+        }
+    
+        #messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+        }
+    
+        .message {
+            margin: 10px 0;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+    
+        .user {
+            background: #4a90e2;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px 10px 0 10px;
+            margin-left: auto;
+            text-align: right;
+        }
+    
+        .bot {
+            background: #ffcc80;
+            color: black;
+            padding: 10px 15px;
+            border-radius: 10px 10px 10px 0;
+            margin-right: auto;
+            text-align: left;
+        }
+    
+        #user_input {
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            width: calc(100% - 110px);
+            outline: none;
+            border-radius: 0 0 0 10px;
+        }
+    
+        #send {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            outline: none;
+            width: 100px;
+            border-radius: 0 0 10px 0;
+        }
+    
+        #send:hover {
+            background: #357abd;
+        }
+    
+        /* Scrollbar customization */
+        #messages::-webkit-scrollbar {
+            width: 10px;
+        }
+    
+        #messages::-webkit-scrollbar-thumb {
+            background: #4a90e2;
+            border-radius: 5px;
+        }
+    
+        #messages::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+    </style>
+    
+</head>
+<body>
+    <div id="chatbox">
+        <h2>Chat with the Bot</h2>
+        <div id="messages"></div>
+        <input type="text" id="user_input" placeholder="Type your message...">
+        <button id="send">Send</button>
+    </div>
+    <script>
+        const messagesDiv = document.getElementById("messages");
+        const userInput = document.getElementById("user_input");
+        const sendButton = document.getElementById("send");
+
+        function appendMessage(message, sender) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", sender);
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        sendButton.addEventListener("click", () => {
+            const userMessage = userInput.value;
+            if (userMessage.trim() !== "") {
+                appendMessage(userMessage, "user");
+                fetch("/get_response", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ message: userMessage }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    appendMessage(data.response, "bot");
+                });
+                userInput.value = "";
+            }
+        });
+
+        userInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                sendButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
